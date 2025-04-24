@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ステージ人数管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .stage {
+      background: white;
+      margin: 15px auto;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stage.full {
+      background-color: #ffebee;
+    }
+    .name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .count {
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: white;
+    }
+    button.minus {
+      background-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h2>ステージ人数管理</h2>
+  <div id="container"></div>
+
+  <script>
+    const API_URL = '<<https://script.google.com/macros/s/AKfycbzTkQPpLUVZPZ4SmcU1XQpLp8noqrak1YUCyWRl09HAdX-H4sGkeUxzUFrgxK-kTGB9UQ/exec>>';
+
+    async function fetchData() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      render(data);
+    }
+
+    function render(data) {
+      const container = document.getElementById('container');
+      container.innerHTML = '';
+      data.forEach(stage => {
+        const div = document.createElement('div');
+        div.className = 'stage' + (stage.count > stage.max ? ' full' : '');
+        div.innerHTML = `
+          <div class="name">${stage.stage}</div>
+          <div class="count">${stage.count} / ${stage.max} グループ</div>
+          <div class="buttons">
+            <button onclick="update('${stage.stage}', 1)">＋</button>
+            <button class="minus" onclick="update('${stage.stage}', -1)">−</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function update(stageName, delta) {
+      await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ stage: stageName, delta: delta }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      fetchData();
+    }
+
+    fetchData();
+    setInterval(fetchData, 5000);
+  </script>
+</body>
+</html>
